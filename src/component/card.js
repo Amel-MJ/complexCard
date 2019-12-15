@@ -4,15 +4,58 @@ import "./card.css";
 class card extends Component {
   state = {
     placeholderUserName: "Votre Nom",
-    placeholderCardNumber: "***** ***** ***** *****",
+    placeholderCardNumber: "**** **** **** ****",
     placeholderCardDate: "Date d'expiration",
     userName: "",
     cardNumber: "",
     cardDate: "",
     displayMessage: "Enter the user name",
-    valid: {
+    validUser: {
       status: true,
       message: ""
+    },
+    validNumber: {
+      status: true,
+      message: ""
+    },
+    validDate: {
+      status: true,
+      message: ""
+    }
+  };
+
+  checkCard = event => {
+    var regexCard = /^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$/;
+    if (!regexCard.test(event.target.value)) {
+      this.setState({
+        validNumber: { status: false, message: "Card number not valid" }
+      });
+    } else if (event.target.value.length > 19) {
+      this.setState({
+        validUser: {
+          status: false,
+          message: "ne doit pas dépasser 16 chiffres"
+        }
+      });
+    } else {
+      this.setState({
+        validNumber: { status: true, message: "" },
+        [event.target.name]: event.target.value
+      });
+    }
+  };
+
+  checkDate = event => {
+    let regexCard = /^[0-9]{2}\/[0-9]{2}$/;
+    if (!regexCard.test(event.target.value)) {
+      this.setState({
+        validDate: { status: false, message: "Card date not valid" }
+      });
+    } else {
+      this.setState({
+        validDate: { status: true, message: "" },
+        [event.target.name]: event.target.value
+      });
     }
   };
 
@@ -22,41 +65,60 @@ class card extends Component {
         var regex = /[^A-Za-z ]/g;
         if (event.target.value.match(regex)) {
           this.setState({
-            valid: { status: false, message: "Tape only text" }
+            validUser: { status: false, message: "Tape only text" }
           });
         } else if (event.target.value.length > 20) {
           this.setState({
-            valid: { status: false, message: "doit être moins de 20" }
+            validUser: { status: false, message: "doit être moins de 20" }
           });
         } else {
           this.setState({
-            valid: { status: true, message: "" },
+            validUser: { status: true, message: "" },
             [event.target.name]: event.target.value
           });
         }
         break;
       case "cardNumber":
-        regex = /[^A-Za-z ]/g;
-        if (event.target.value.match(regex)) {
+        //regex =  /^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$/;
+        event.target.value = event.target.value
+          .replace(/[^\d]/g, "")
+          .replace(/(.{4})/g, "$1 ")
+          .trim();
+
+        regex = /^[0-9 ]*$/;
+        //if (!event.target.value.match(regex)) {
+        if (!regex.test(event.target.value)) {
           this.setState({
-            valid: { status: false, message: "Card number not valid" }
+            validNumber: { status: false, message: "Card number not valid" }
+          });
+        } else if (event.target.value.length > 19) {
+          this.setState({
+            validUser: {
+              status: false,
+              message: "ne doit pas dépasser 16 chiffres"
+            }
           });
         } else {
           this.setState({
-            valid: { status: true, message: "" },
+            validNumber: { status: true, message: "" },
             [event.target.name]: event.target.value
           });
         }
         break;
       case "cardDate":
-        regex = /[^A-Za-z ]/g;
-        if (event.target.value.match(regex)) {
+        event.target.value = event.target.value
+          .replace(/[^\d]/g, "")
+          .replace(/^(.{2})/g, "$1/")
+          .trim();
+
+        regex = /^[0-9\/]*$/;
+        if (!regex.test(event.target.value)) {
           this.setState({
-            valid: { status: false, message: "card date not valid" }
+            validDate: { status: false, message: "card date not valid" }
           });
         } else {
           this.setState({
-            valid: { status: true, message: "" },
+            validDate: { status: true, message: "" },
             [event.target.name]: event.target.value
           });
         }
@@ -88,15 +150,24 @@ class card extends Component {
 
         {/* Remplissage des données */}
         <div className="bgCard">
+          {!this.state.validNumber.status ? (
+            <span style={{ color: "#ff0000" }}>
+              {this.state.validNumber.message}
+            </span>
+          ) : null}
           <input
             className="styleInput"
             type="text"
             name="cardNumber"
+            maxLength="19"
             placeholder={this.state.placeholderCardNumber}
             onChange={this.update}
+            onBlur={this.checkCard}
           />{" "}
-          {!this.state.valid.status ? (
-            <span style={{ color: "#ff0000" }}>{this.state.valid.message}</span>
+          {!this.state.validUser.status ? (
+            <span style={{ color: "#ff0000" }}>
+              {this.state.validUser.message}
+            </span>
           ) : null}
           <input
             className="styleInput"
@@ -105,19 +176,20 @@ class card extends Component {
             placeholder={this.state.placeholderUserName}
             onChange={this.update}
           />
-          {!this.state.valid.status ? (
-            <span style={{ color: "#ff0000" }}>{this.state.valid.message}</span>
+          {!this.state.validDate.status ? (
+            <span style={{ color: "#ff0000" }}>
+              {this.state.validDate.message}
+            </span>
           ) : null}
           <input
             className="styleInput"
             type="text"
             name="cardDate"
+            maxLength="5"
             placeholder={this.state.placeholderCardDate}
             onChange={this.update}
+            onBlur={this.checkDate}
           />
-          {!this.state.valid.status ? (
-            <span style={{ color: "#ff0000" }}>{this.state.valid.message}</span>
-          ) : null}
         </div>
       </div>
     );
