@@ -79,14 +79,13 @@ class card extends Component {
         }
         break;
       case "cardNumber":
-        //regex =  /^[0-9]{4} [0-9]{4} [0-9]{4} [0-9]{4}$/;
         event.target.value = event.target.value
           .replace(/[^\d]/g, "")
           .replace(/(.{4})/g, "$1 ")
           .trim();
 
         regex = /^[0-9 ]*$/;
-        //if (!event.target.value.match(regex)) {
+
         if (!regex.test(event.target.value)) {
           this.setState({
             validNumber: { status: false, message: "Card number not valid" }
@@ -106,20 +105,20 @@ class card extends Component {
         }
         break;
       case "cardDate":
-        event.target.value = event.target.value
-          .replace(/[^\d]/g, "")
-          .replace(/^(.{2})/g, "$1/")
-          .trim();
-
-        regex = /^[0-9\/]*$/;
-        if (!regex.test(event.target.value)) {
+        let re = /^[0-9]*$/;
+        if (
+          re.test(event.target.value) &&
+          event.target.value.slice(0, 2) < 13
+        ) {
           this.setState({
-            validDate: { status: false, message: "card date not valid" }
+            cardDate: event.target.value
+              .replace(/[^\d]/g, "")
+              .replace(/^(.{2})/g, "$1/")
+              .trim()
           });
         } else {
           this.setState({
-            validDate: { status: true, message: "" },
-            [event.target.name]: event.target.value
+            validDate: { status: false, message: "card date not valid" }
           });
         }
         break;
@@ -140,7 +139,7 @@ class card extends Component {
             alt=""
           />
           <div className="userCard">
-            <div className="userName">{this.state.userName}</div>
+            <div className="userName">{this.state.userName.toUpperCase()}</div>
 
             <div className="userCardValidation">
               <span>{this.state.cardDate}</span>
@@ -185,7 +184,7 @@ class card extends Component {
             className="styleInput"
             type="text"
             name="cardDate"
-            maxLength="5"
+            maxLength="4"
             placeholder={this.state.placeholderCardDate}
             onChange={this.update}
             onBlur={this.checkDate}
